@@ -1,177 +1,356 @@
-# 🛒 API de E-commerce — CRUD de Products & Categories
+# 📚 API E-commerce — Atividade 9
 
-Atividade prática desenvolvida como parte do curso Fullstack (PU12 — Atividade 9). O projeto implementa uma API RESTful completa para gerenciamento de **produtos** e **categorias**, seguindo uma arquitetura em camadas bem definida com TypeScript.
+API RESTful para gerenciamento de categorias e produtos com autenticação JWT.
+
+🔗 **Repositório:** [github.com/rubensparente/fullstack-pu12_atividade9](https://github.com/rubensparente/fullstack-pu12_atividade9)
 
 ---
 
-## 🏗️ Arquitetura
+## 📋 Índice
 
-O projeto segue o padrão de separação de responsabilidades em três camadas principais:
+- [Tecnologias](#-tecnologias)
+- [Estrutura do Projeto](#-estrutura-do-projeto)
+- [Instalação e Execução](#-instalação-e-execução)
+- [Endpoints da API](#-endpoints-da-api)
+- [Autenticação](#-autenticação)
+- [Exemplos de Uso](#-exemplos-de-uso)
+- [Status Codes](#-status-codes)
+- [Validações](#-validações)
+- [Banco de Dados](#-banco-de-dados)
+- [Contribuição](#-contribuição)
+
+---
+
+## 🚀 Tecnologias
+
+| Tecnologia | Descrição |
+|------------|-----------|
+| Node.js | Runtime JavaScript |
+| Express | Framework web |
+| TypeScript | Superset tipado |
+| SQLite | Banco de dados |
+| JWT | Autenticação |
+| Zod | Validação de dados |
+
+---
+
+## 📁 Estrutura do Projeto
 
 ```
 src/
-├── entities/         # Regras de negócio encapsuladas nas entidades
-├── repositories/     # Acesso ao banco de dados (SQL puro)
-├── services/         # Lógica de aplicação e orquestração
-├── controllers/      # Tradução entre HTTP e a camada de serviço
-├── dtos/             # Objetos de transferência de dados (entrada e saída)
-├── middlewares/      # Auth, autorização, logger e tratamento de erros
-├── routes/           # Definição das rotas públicas e protegidas
-└── database/         # Schema e configuração do banco de dados
+├── controllers/     # Lógica das requisições
+├── services/        # Regras de negócio
+├── repositories/    # Acesso ao banco
+├── entities/        # Modelos
+├── middlewares/     # Autenticação, validação, erros
+├── schemas/         # Validações Zod
+├── dtos/            # Transferência de dados
+├── database/        # Configuração SQLite
+├── routers/         # Rotas da API
+└── server.ts        # Ponto de entrada
 ```
 
-Nenhuma camada viola os seus limites:
-
-- **Entities** — constroem e validam a si mesmas via métodos estáticos (`Category.create`, `Product.create`)
-- **Repositories** — apenas persistem e consultam dados, sem decisões de negócio
-- **Services** — orquestram as regras, validam existência de referências e delegam ao repository
-- **Controllers** — validam formato via Zod e traduzem HTTP para chamadas de serviço
-
 ---
 
-## ✅ Funcionalidades
+## ⚙️ Instalação e Execução
 
-### Categories
-| Método | Rota | Proteção | Descrição |
-|--------|------|----------|-----------|
-| GET | `/categories` | Pública | Lista todas as categorias com paginação |
-| GET | `/categories/:id` | Pública | Busca uma categoria por ID |
-| POST | `/categories` | Admin | Cria uma nova categoria |
-| PUT | `/categories/:id` | Admin | Atualiza o nome de uma categoria |
-| DELETE | `/categories/:id` | Admin | Remove uma categoria |
-
-### Products
-| Método | Rota | Proteção | Descrição |
-|--------|------|----------|-----------|
-| GET | `/products` | Pública | Lista todos os produtos com paginação |
-| GET | `/products/:id` | Pública | Busca um produto por ID |
-| POST | `/products` | Admin | Cria um novo produto (valida categoria) |
-| PUT | `/products/:id` | Admin | Atualiza um produto (revalida categoria se alterada) |
-| DELETE | `/products/:id` | Admin | Remove um produto |
-
----
-
-## 🔐 Autenticação e Autorização
-
-- Rotas `GET` são **públicas** — não exigem token
-- Rotas `POST`, `PUT` e `DELETE` exigem:
-  - Token JWT válido via `authMiddleware`
-  - Role `admin` via `authorize`
-- Requisições sem token retornam **401 Unauthorized**
-- Requisições com token de role incorreta retornam **403 Forbidden**
-
----
-
-## 🧱 Tecnologias
-
-- **TypeScript** — tipagem estática em toda a aplicação
-- **Node.js + Express** — servidor HTTP
-- **Zod** — validação de schemas nos controllers
-- **JWT** — autenticação stateless
-- **SQL** — persistência com queries manuais (LIMIT/OFFSET para paginação)
-
----
-
-## 🚀 Como executar
-
-**Pré-requisitos:** Node.js 18+ e um banco de dados SQL configurado.
+**Pré-requisitos:** Node.js 18+ e npm ou yarn.
 
 ```bash
-# 1. Clone o repositório
+# Clone o repositório
 git clone https://github.com/rubensparente/fullstack-pu12_atividade9.git
 cd fullstack-pu12_atividade9
 
-# 2. Instale as dependências
+# Instale as dependências
 npm install
 
-# 3. Configure as variáveis de ambiente
+# Configure as variáveis de ambiente
 cp .env.example .env
-# Edite o .env com as credenciais do banco e o segredo JWT
 
-# 4. Execute as migrations (schema do banco)
-npm run migrate
-
-# 5. Inicie o servidor em desenvolvimento
+# Modo desenvolvimento (com hot-reload)
 npm run dev
+
+# Modo produção
+npm run build
+npm start
+```
+
+**Variáveis de ambiente (`.env`):**
+
+```env
+PORT=3000
+JWT_SECRET=seu-segredo-jwt-aqui
 ```
 
 ---
 
-## 📦 Scripts disponíveis
+## 📡 Endpoints da API
 
-| Script | Descrição |
-|--------|-----------|
-| `npm run dev` | Inicia o servidor com hot-reload |
-| `npm run build` | Compila o TypeScript para JavaScript |
-| `npm start` | Executa a build compilada |
+### 🔐 Autenticação
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| POST | `/auth/login` | Login — gera token JWT |
+
+> **Credenciais de teste:** `admin@email.com` / `admin123`
 
 ---
 
-## 📋 Exemplos de uso
+### 📦 Categorias — `/categories`
 
-### Criar uma categoria (requer token admin)
+| Método | Endpoint | Descrição | Auth |
+|--------|----------|-----------|------|
+| GET | `/categories` | Listar categorias | ❌ |
+| GET | `/categories/:id` | Buscar por ID | ❌ |
+| POST | `/categories` | Criar categoria | ✅ |
+| PUT | `/categories/:id` | Atualizar categoria | ✅ |
+| DELETE | `/categories/:id` | Deletar categoria | ✅ |
+
+**Query params (GET):**
+
+| Parâmetro | Tipo | Padrão | Descrição |
+|-----------|------|--------|-----------|
+| `page` | number | `1` | Número da página |
+| `size` | number | `10` | Itens por página |
+
+---
+
+### 📱 Produtos — `/products`
+
+| Método | Endpoint | Descrição | Auth |
+|--------|----------|-----------|------|
+| GET | `/products` | Listar produtos | ❌ |
+| GET | `/products/:id` | Buscar por ID | ❌ |
+| POST | `/products` | Criar produto | ✅ |
+| PUT | `/products/:id` | Atualizar produto | ✅ |
+| DELETE | `/products/:id` | Deletar produto | ✅ |
+
+**Query params (GET):**
+
+| Parâmetro | Tipo | Padrão | Descrição |
+|-----------|------|--------|-----------|
+| `page` | number | `1` | Número da página |
+| `size` | number | `10` | Itens por página |
+| `categoryId` | string | — | Filtrar por categoria (UUID) |
+
+---
+
+## 🔐 Autenticação
+
+### 1. Login
+
 ```http
-POST /categories
-Authorization: Bearer <token>
+POST /auth/login
 Content-Type: application/json
 
 {
-  "name": "Eletrônicos"
+  "email": "admin@email.com",
+  "password": "admin123"
 }
 ```
 
-### Criar um produto (requer token admin)
-```http
-POST /products
-Authorization: Bearer <token>
-Content-Type: application/json
+**Resposta `200 OK`:**
 
+```json
 {
-  "name": "Notebook Dell",
-  "price": 3999.90,
-  "stock": 15,
-  "categoryId": "uuid-da-categoria"
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": "1",
+    "email": "admin@email.com",
+    "role": "admin"
+  }
 }
 ```
 
-### Listar produtos com paginação (público)
+### 2. Usar o token
+
 ```http
-GET /products?page=1&size=10
+Authorization: Bearer SEU_TOKEN_AQUI
+```
+
+> ⏰ O token expira em **1 hora**. Para renovar, faça login novamente.
+
+---
+
+## 📝 Exemplos de Uso
+
+### cURL
+
+```bash
+# 1. Login e captura do token
+TOKEN=$(curl -s -X POST http://localhost:3000/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@email.com","password":"admin123"}' \
+  | grep -o '"token":"[^"]*"' | cut -d'"' -f4)
+
+# 2. Criar categoria
+curl -X POST http://localhost:3000/categories \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Eletrônicos","description":"Produtos eletrônicos"}'
+
+# 3. Listar categorias
+curl "http://localhost:3000/categories?page=1&size=10"
+
+# 4. Criar produto
+curl -X POST http://localhost:3000/products \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Smartphone","price":1999.99,"categoryId":"UUID_AQUI","stock":10}'
+
+# 5. Listar produtos
+curl "http://localhost:3000/products?page=1&size=10"
+
+# 6. Filtrar produtos por categoria
+curl "http://localhost:3000/products?categoryId=UUID_AQUI"
+
+# 7. Atualizar produto
+curl -X PUT http://localhost:3000/products/ID_PRODUTO \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Smartphone Pro","price":2999.99,"stock":25}'
+
+# 8. Deletar produto
+curl -X DELETE http://localhost:3000/products/ID_PRODUTO \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Thunder Client
+
+**Environment:**
+
+```json
+{
+  "baseUrl": "http://localhost:3000",
+  "token": ""
+}
+```
+
+**Script para salvar o token automaticamente (aba Tests do Login):**
+
+```javascript
+if (response.body && response.body.token) {
+  env.set("token", response.body.token);
+  console.log("✅ Token salvo automaticamente!");
+}
+```
+
+### TypeScript
+
+```typescript
+import fetch from 'node-fetch';
+
+const BASE_URL = 'http://localhost:3000';
+
+async function exemplo() {
+  const loginResponse = await fetch(`${BASE_URL}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: 'admin@email.com', password: 'admin123' })
+  });
+
+  const { token } = await loginResponse.json();
+
+  const categoryResponse = await fetch(`${BASE_URL}/categories`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({ name: 'Eletrônicos', description: 'Produtos eletrônicos' })
+  });
+
+  console.log(await categoryResponse.json());
+}
+
+exemplo();
 ```
 
 ---
 
-## 🗂️ DTOs
+## 📊 Status Codes
 
-### `ProductResponseDto`
-```json
-{
-  "id": "uuid",
-  "name": "Notebook Dell",
-  "price": 3999.90,
-  "stock": 15,
-  "categoryId": "uuid-da-categoria"
-}
+| Código | Significado |
+|--------|-------------|
+| `200` | ✅ Sucesso |
+| `201` | ✅ Criado com sucesso |
+| `204` | ✅ Sem conteúdo (deleção) |
+| `400` | ❌ Erro de validação |
+| `401` | ❌ Token ausente ou inválido |
+| `403` | ❌ Sem permissão (role incorreta) |
+| `404` | ❌ Recurso não encontrado |
+| `500` | ❌ Erro interno do servidor |
+
+---
+
+## 📋 Validações
+
+### Categoria
+
+| Campo | Tipo | Regras |
+|-------|------|--------|
+| `name` | string | Mínimo 3 caracteres, máximo 100 |
+| `description` | string | Opcional |
+
+### Produto
+
+| Campo | Tipo | Regras |
+|-------|------|--------|
+| `name` | string | Mínimo 3 caracteres |
+| `price` | number | Deve ser positivo |
+| `categoryId` | string | UUID válido existente |
+| `stock` | number | Opcional, mínimo 0 |
+
+---
+
+## 🗄️ Banco de Dados
+
+### Tabela `categories`
+
+```sql
+id          TEXT PRIMARY KEY
+name        TEXT NOT NULL UNIQUE
+description TEXT
+created_at  DATETIME DEFAULT CURRENT_TIMESTAMP
+updated_at  DATETIME DEFAULT CURRENT_TIMESTAMP
 ```
 
-### `ProductListDto`
-```json
-{
-  "data": [ /* array de ProductResponseDto */ ],
-  "page": 1,
-  "size": 10
-}
+### Tabela `products`
+
+```sql
+id          TEXT PRIMARY KEY
+name        TEXT NOT NULL
+price       REAL NOT NULL
+stock       INTEGER DEFAULT 0
+category_id TEXT NOT NULL REFERENCES categories(id) ON DELETE RESTRICT
+created_at  DATETIME DEFAULT CURRENT_TIMESTAMP
+updated_at  DATETIME DEFAULT CURRENT_TIMESTAMP
+```
+
+### Índices
+
+```sql
+CREATE INDEX idx_products_category ON products(category_id);
+CREATE INDEX idx_products_name     ON products(name);
+CREATE INDEX idx_categories_name   ON categories(name);
 ```
 
 ---
 
-## 🛡️ Tratamento de erros
+## 🤝 Contribuição
 
-Todos os erros previsíveis são capturados pelo `errorMiddleware` global e retornam respostas padronizadas. O servidor não quebra em nenhum cenário de erro esperado.
+1. Fork o projeto
+2. Crie sua branch (`git checkout -b feature/nova-funcionalidade`)
+3. Commit suas mudanças (`git commit -m 'Adiciona nova funcionalidade'`)
+4. Push para a branch (`git push origin feature/nova-funcionalidade`)
+5. Abra um Pull Request
+
+**Padrões de código:** use TypeScript, siga a separação de responsabilidades entre camadas, valide entradas com Zod e documente novos endpoints.
 
 ---
 
 ## 👤 Autor
 
-**Rubens Parente**  
-[github.com/rubensparente](https://github.com/rubensparente)
+**Rubens Parente** — [@rubensparente](https://github.com/rubensparente)
+
+Projeto: [github.com/rubensparente/fullstack-pu12_atividade9](https://github.com/rubensparente/fullstack-pu12_atividade9)
