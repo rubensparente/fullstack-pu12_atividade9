@@ -337,18 +337,6 @@ CREATE INDEX idx_categories_name   ON categories(name);
 
 ---
 
-## 🤝 Contribuição
-
-1. Fork o projeto
-2. Crie sua branch (`git checkout -b feature/nova-funcionalidade`)
-3. Commit suas mudanças (`git commit -m 'Adiciona nova funcionalidade'`)
-4. Push para a branch (`git push origin feature/nova-funcionalidade`)
-5. Abra um Pull Request
-
-**Padrões de código:** use TypeScript, siga a separação de responsabilidades entre camadas, valide entradas com Zod e documente novos endpoints.
-
----
-
 ## 👤 Autor
 
 **Rubens Parente** — [@rubensparente](https://github.com/rubensparente)
